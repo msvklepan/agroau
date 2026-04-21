@@ -1,9 +1,8 @@
 {
-  "projects": [
-    {
-      "rootDirectory": "audaces-agro-tm",
-      "buildCommand": "npm run build",
-      "outputDirectory": "dist"
-    }
+  "buildCommand": "cd audaces-agro-tm && npm run build",
+  "outputDirectory": "audaces-agro-tm/dist",
+  "framework": "vite",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
