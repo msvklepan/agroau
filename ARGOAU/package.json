@@ -1,0 +1,8 @@
+{
+  "name": "agroau",
+  "private": true,
+  "scripts": {
+    "build": "cd audaces-agro-tm && npm install && npm run build",
+    "dev": "cd audaces-agro-tm && npm run dev"
+  }
+}

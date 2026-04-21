@@ -1,5 +1,4 @@
 {
-  "buildCommand": "cd audaces-agro-tm && npm run build",
   "outputDirectory": "audaces-agro-tm/dist",
   "framework": "vite",
   "rewrites": [
