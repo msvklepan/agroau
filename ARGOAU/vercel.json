@@ -1,7 +1,3 @@
 {
-  "outputDirectory": "audaces-agro-tm/dist",
-  "framework": "vite",
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
+  "outputDirectory": "audaces-agro-tm/dist"
 }
