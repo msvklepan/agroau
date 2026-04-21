@@ -1,0 +1,9 @@
+{
+  "projects": [
+    {
+      "rootDirectory": "audaces-agro-tm",
+      "buildCommand": "npm run build",
+      "outputDirectory": "dist"
+    }
+  ]
+}
