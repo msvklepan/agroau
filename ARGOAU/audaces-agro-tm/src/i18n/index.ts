@@ -1,0 +1,78 @@
+export type Lang = 'en' | 'ru'
+
+export const T = {
+  en: {
+    systemBar: 'AUDACES INC. · AGRO-TECH SYSTEMS · AHAL REGION, TURKMENISTAN',
+    nav: { dashboard: 'Dashboard', fields: 'Fields', machinery: 'Machinery', breeding: 'Breeding', analytics: 'Analytics', laserOps: 'Laser Ops' },
+    topFilters: ['Crop Mgmt', 'Finance', 'Resources', 'Analyze', 'Field Ops'],
+    sidebar: { title: 'Active Tasks', search: 'Search tasks…', noTasks: 'No tasks found', live: 'live' },
+    taskFilters: [
+      { id: 'all', label: 'All' }, { id: 'code-red', label: '🎯 Laser' },
+      { id: 'code-wall', label: '🛰 Scan' }, { id: 'breeding', label: '🧬 Breed' }, { id: 'harvest', label: '🌾 Harvest' },
+    ],
+    task: { season: 'Season', dates: 'Dates', worker: 'Worker', action: 'Action', progress: 'Progress', done: 'Completed successfully' },
+    badge: { inProgress: 'In progress', pending: 'Pending', completed: 'Completed' },
+    cropPanel: { title: 'My Crop Productions', viewAll: 'View all →', addField: '+ Add field' },
+    weather: { location: 'Ahal Region · Turkmenistan', wind: 'Wind', humidity: 'Humidity', vis: 'Vis.', desc: 'Sunny — wind 14 km/h NE' },
+    metrics: { area: 'Total Area', tasks: 'AI Tasks', active: 'active', fieldsActive: 'fields active', critical: 'critical' },
+    codeRed: {
+      title: 'Code Red', sub: 'Laser Pest Control · Ahal TM',
+      eliminated: 'Targets eliminated', estTarget: 'of est. 2,100 · TM-01 Zone C4',
+      progress: 'Mission progress', modules: 'Laser Modules',
+      density: 'Pest density by zone', log: 'Event Log',
+      safety: 'All zones clear · No large mammals detected', acc: 'acc.',
+    },
+    codeWall: { title: 'Code Wall', sub: 'Sentinel-2 · 10 min ago', byField: 'by field', npk: 'Average NPK (all fields)', salinity: 'Salinity (EC) per field' },
+    breeding: {
+      title: 'Digital Breeding', sub: 'GNN-Hybrid v3.2 · 847 genotypes',
+      simProg: 'Simulation progress', evaluated: 'of 847 genotypes evaluated', eta: 'ETA ~45 min',
+      advisor: 'AI Breeding Advisor', chatPh: 'Ask about drought, yield, hybrid strategy…',
+      quickPrompts: ['Drought hybrid?', 'Best yield?', 'Salinity?', 'Disease resist?'],
+    },
+    map: { search: 'Search field…', alerts: 'Alert' },
+    layers: { ndvi: 'NDVI', brix: 'Brix Index', salinity: 'Salinity' },
+    modal: {
+      title: 'Add New Field', nameLabel: 'Field Name', namePh: 'e.g. TM-07 · Ahal',
+      cropLabel: 'Crop Type', areaLabel: 'Area (ha)', areaPh: '0',
+      regionLabel: 'Region', regionPh: 'e.g. Ahal Province',
+      cancel: 'Cancel', submit: 'Add Field',
+    },
+  },
+  ru: {
+    systemBar: 'AUDACES INC. · АГРО-ТЕХ СИСТЕМЫ · АХАЛСКИЙ ВЕЛАЯТ, ТУРКМЕНИСТАН',
+    nav: { dashboard: 'Панель', fields: 'Поля', machinery: 'Техника', breeding: 'Селекция', analytics: 'Аналитика', laserOps: 'Лазер' },
+    topFilters: ['Культуры', 'Финансы', 'Ресурсы', 'Анализ', 'Полевые'],
+    sidebar: { title: 'Активные задачи', search: 'Поиск задач…', noTasks: 'Задач не найдено', live: 'активно' },
+    taskFilters: [
+      { id: 'all', label: 'Все' }, { id: 'code-red', label: '🎯 Лазер' },
+      { id: 'code-wall', label: '🛰 Скан' }, { id: 'breeding', label: '🧬 Селекц.' }, { id: 'harvest', label: '🌾 Уборка' },
+    ],
+    task: { season: 'Сезон', dates: 'Даты', worker: 'Рабочий', action: 'Действие', progress: 'Прогресс', done: 'Успешно выполнено' },
+    badge: { inProgress: 'В работе', pending: 'Ожидание', completed: 'Выполнено' },
+    cropPanel: { title: 'Мои культуры', viewAll: 'Все →', addField: '+ Добавить поле' },
+    weather: { location: 'Регион Ахал · Туркменистан', wind: 'Ветер', humidity: 'Влажность', vis: 'Видим.', desc: 'Солнечно — ветер 14 км/ч СВ' },
+    metrics: { area: 'Площадь', tasks: 'Задачи ИИ', active: 'активно', fieldsActive: 'поля активны', critical: 'критично' },
+    codeRed: {
+      title: 'Красный Код', sub: 'Лазерный контроль · Ахал ТМ',
+      eliminated: 'Целей уничтожено', estTarget: 'из ~2 100 · ТМ-01 Зона С4',
+      progress: 'Прогресс миссии', modules: 'Лазерные модули',
+      density: 'Плотность вредителей по зонам', log: 'Журнал событий',
+      safety: 'Все зоны чисты · Крупных животных не обнаружено', acc: 'точн.',
+    },
+    codeWall: { title: 'Стена кода', sub: 'Sentinel-2 · 10 мин назад', byField: 'по полям', npk: 'Средний NPK (все поля)', salinity: 'Засолённость (EC) по полям' },
+    breeding: {
+      title: 'Цифровая Селекция', sub: 'GNN-Hybrid v3.2 · 847 генотипов',
+      simProg: 'Прогресс симуляции', evaluated: 'из 847 генотипов оценено', eta: 'Осталось ~45 мин',
+      advisor: 'Советник по Селекции ИИ', chatPh: 'Спросите про засуху, урожайность, стратегию…',
+      quickPrompts: ['Гибрид засухи?', 'Лучший урожай?', 'Засоление?', 'Болезнестойкость?'],
+    },
+    map: { search: 'Поиск поля…', alerts: 'Тревога' },
+    layers: { ndvi: 'ВЕГЕТ.', brix: 'Брикс', salinity: 'Засол.' },
+    modal: {
+      title: 'Добавить поле', nameLabel: 'Название поля', namePh: 'напр. ТМ-07 · Ахал',
+      cropLabel: 'Культура', areaLabel: 'Площадь (га)', areaPh: '0',
+      regionLabel: 'Регион', regionPh: 'напр. Ахалская область',
+      cancel: 'Отмена', submit: 'Добавить',
+    },
+  },
+} as const

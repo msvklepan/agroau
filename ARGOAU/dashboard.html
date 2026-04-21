@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARGOAU — Intelligence Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* macOS Dark Mode System Colors */
+    --mac-bg: #000000;
+    --mac-sidebar: rgba(30, 30, 30, 0.75);
+    --mac-surface: #1C1C1E;
+    --mac-surface-elevated: #2C2C2E;
+    --mac-border: rgba(255, 255, 255, 0.08);
+    --mac-divider: rgba(255, 255, 255, 0.04);
+    
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(235, 235, 245, 0.6);
+    --text-tertiary: rgba(235, 235, 245, 0.3);
+    
+    /* Apple HIG Colors */
+    --system-blue: #0A84FF;
+    --system-green: #32D74B;
+    --system-red: #FF453A;
+    --system-orange: #FF9F0A;
+    --system-purple: #BF5AF2;
+    --system-gray: #8E8E93;
+
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+    --font-mono: 'SF Mono', ui-monospace, 'JetBrains Mono', monospace;
+
+    --blur-heavy: blur(40px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  
+  body {
+    background-color: var(--mac-bg);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* App Window Outline (simulating desktop environment) */
+  .app-window {
+    width: 100%; height: 100%;
+    display: flex; position: relative;
+    background: var(--mac-bg);
+  }
+
+  /* ── SIDEBAR (macOS Style) ── */
+  .sidebar {
+    width: 250px; height: 100%;
+    background: var(--mac-sidebar);
+    backdrop-filter: var(--blur-heavy);
+    -webkit-backdrop-filter: var(--blur-heavy);
+    border-right: 1px solid var(--mac-border);
+    display: flex; flex-direction: column;
+    padding: 20px 12px; z-index: 100;
+  }
+
+  /* Window Controls */
+  .window-controls { display: flex; gap: 8px; padding: 0 8px 32px 8px; }
+  .win-btn { width: 12px; height: 12px; border-radius: 50%; }
+  .win-btn.close { background: #FF5F56; }
+  .win-btn.min { background: #FFBD2E; }
+  .win-btn.max { background: #27C93F; }
+
+  .nav-group-title {
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    padding: 0 10px; margin-bottom: 6px; margin-top: 24px;
+  }
+
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; border-radius: 6px;
+    color: var(--text-primary); font-size: 13px; font-weight: 400;
+    cursor: pointer; transition: 0.15s; margin-bottom: 2px;
+  }
+  .nav-item:hover { background: rgba(255, 255, 255, 0.05); }
+  .nav-item.active { background: var(--system-blue); color: #fff; font-weight: 500; }
+  .nav-icon { width: 16px; height: 16px; opacity: 0.8; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  .nav-item.red-item { color: var(--system-red); }
+  .nav-item.red-item.active { background: var(--system-red); color: #fff; }
+
+  .user-profile {
+    margin-top: auto; padding: 12px 10px; display: flex; align-items: center; gap: 10px;
+    border-top: 1px solid var(--mac-divider);
+  }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--mac-surface-elevated); display: grid; place-items: center; font-size: 12px; font-weight: 500; }
+  .user-details { display: flex; flex-direction: column; }
+  .user-name { font-size: 13px; font-weight: 500; }
+  .user-role { font-size: 11px; color: var(--text-secondary); }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    flex: 1; position: relative; display: flex; flex-direction: column;
+  }
+  
+  .view {
+    display: none; width: 100%; height: 100%; overflow-y: auto;
+    animation: fadeIn 0.3s ease; padding: 48px;
+  }
+  .view.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Generic Content Layout */
+  .page-header { margin-bottom: 40px; }
+  .page-title { font-size: 28px; font-weight: 600; letter-spacing: -0.5px; color: var(--text-primary); margin-bottom: 4px; }
+  .page-subtitle { font-size: 14px; color: var(--text-secondary); }
+
+  .content-grid {
+    display: grid; grid-template-columns: repeat(12, 1fr); gap: 24px; max-width: 1400px;
+  }
+
+  /* macOS Style Panels */
+  .panel {
+    background: var(--mac-surface); border-radius: 12px;
+    border: 1px solid var(--mac-border); padding: 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+  }
+  .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .panel-title { font-size: 14px; font-weight: 500; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; }
+  
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
+  /* =========================================
+     1. MAP (Crop Mgmt) - Unchanged Structure, Refined Style
+     ========================================= */
+  #v-map { padding: 0; }
+  .map-wrapper { position: relative; width: 100%; height: 100%; background: #050505; }
+  #map-canvas { width: 100%; height: 100%; display: block; }
+  
+  .map-toolbar {
+    position: absolute; top: 32px; right: 32px; width: 280px;
+    background: rgba(28, 28, 30, 0.85); backdrop-filter: var(--blur-heavy); -webkit-backdrop-filter: var(--blur-heavy);
+    border-radius: 12px; border: 1px solid var(--mac-border);
+    padding: 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .toolbar-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .layer-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
+  .layer-label { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-primary); }
+  .layer-dot { width: 10px; height: 10px; border-radius: 2px; }
+
+  /* Apple Switch */
+  .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--mac-surface-elevated); border: 1px solid var(--mac-border); transition: .2s; border-radius: 20px; }
+  .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 1px; bottom: 1px; background-color: white; transition: .2s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+  input:checked + .slider { background-color: var(--system-green); border-color: var(--system-green); }
+  input:checked + .slider:before { transform: translateX(16px); }
+
+  /* =========================================
+     2. FINANCE
+     ========================================= */
+  .fin-metrics { grid-column: span 12; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .metric-card { display: flex; flex-direction: column; gap: 4px; }
+  .metric-val { font-size: 32px; font-weight: 300; letter-spacing: -1px; color: var(--text-primary); }
+  .metric-sub { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 4px; }
+  .text-green { color: var(--system-green); }
+  .text-red { color: var(--system-red); }
+
+  .fin-chart { grid-column: span 8; height: 360px; display: flex; flex-direction: column; }
+  .fin-table { grid-column: span 4; height: 360px; display: flex; flex-direction: column; overflow: hidden; }
+  
+  .smooth-line-chart { flex: 1; width: 100%; position: relative; margin-top: 20px; }
+  .smooth-line-chart svg { width: 100%; height: 100%; overflow: visible; }
+  .chart-grid-line { stroke: var(--mac-border); stroke-width: 1; }
+  .chart-path { fill: none; stroke: var(--system-blue); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .chart-gradient { fill: url(#blue-grad); opacity: 0.2; }
+  
+  /* Minimalist Table */
+  .table-wrap { overflow-y: auto; flex: 1; margin-top: 12px; }
+  .data-list { width: 100%; border-collapse: collapse; }
+  .data-list td { padding: 12px 0; border-bottom: 1px solid var(--mac-divider); font-size: 13px; }
+  .data-list tr:last-child td { border-bottom: none; }
+  .data-list .dl-name { color: var(--text-primary); }
+  .data-list .dl-val { color: var(--text-primary); text-align: right; font-variant-numeric: tabular-nums; }
+  .data-list .dl-delta { text-align: right; font-weight: 500; font-size: 12px; }
+
+  /* =========================================
+     3. RESOURCES
+     ========================================= */
+  .res-cards { grid-column: span 12; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .res-card { display: flex; flex-direction: column; justify-content: space-between; height: 180px; }
+  .res-header { display: flex; justify-content: space-between; align-items: flex-start; }
+  .res-icon-wrap { width: 32px; height: 32px; border-radius: 8px; background: var(--mac-surface-elevated); display: flex; align-items: center; justify-content: center; color: var(--text-primary); }
+  .res-big-num { font-size: 40px; font-weight: 300; letter-spacing: -1.5px; }
+  
+  /* Sleek Thin Bars */
+  .thin-bar-bg { height: 4px; background: var(--mac-surface-elevated); border-radius: 2px; overflow: hidden; margin-top: auto; margin-bottom: 8px; }
+  .thin-bar-fg { height: 100%; border-radius: 2px; }
+  .res-labels { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-secondary); }
+
+  .res-log { grid-column: span 12; }
+  .log-table { width: 100%; border-collapse: collapse; }
+  .log-table th { text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 500; color: var(--text-secondary); border-bottom: 1px solid var(--mac-border); }
+  .log-table td { padding: 16px; font-size: 13px; color: var(--text-primary); border-bottom: 1px solid var(--mac-divider); }
+  .log-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* =========================================
+     4. ANALYZE
+     ========================================= */
+  .analyze-sidebar { grid-column: span 4; display: flex; flex-direction: column; gap: 12px; }
+  .model-item {
+    background: var(--mac-surface); border: 1px solid var(--mac-border);
+    border-radius: 10px; padding: 16px; display: flex; flex-direction: column; gap: 8px;
+  }
+  .model-item-top { display: flex; justify-content: space-between; align-items: center; }
+  .model-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
+  .model-status { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--text-secondary); }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; }
+  .dot-green { background: var(--system-green); box-shadow: 0 0 8px var(--system-green); }
+  .dot-blue { background: var(--system-blue); box-shadow: 0 0 8px var(--system-blue); }
+  
+  .analyze-console { grid-column: span 8; background: #000; border: 1px solid var(--mac-border); border-radius: 10px; display: flex; flex-direction: column; overflow: hidden; height: 600px; }
+  .console-tab { height: 40px; background: var(--mac-surface); border-bottom: 1px solid var(--mac-border); display: flex; align-items: center; padding: 0 16px; }
+  .console-tab-text { font-family: var(--font-mono); font-size: 12px; color: var(--text-secondary); }
+  .console-output { padding: 16px; flex: 1; overflow-y: auto; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; }
+  .log-row { display: flex; gap: 16px; margin-bottom: 4px; }
+  .l-time { color: var(--text-tertiary); }
+  .l-src { color: var(--system-purple); width: 80px; flex-shrink: 0; }
+  .l-msg { color: var(--text-primary); }
+  .l-msg.warn { color: var(--system-orange); }
+
+  /* =========================================
+     5. CODE RED (Cinematic HUD)
+     ========================================= */
+  #v-codered { padding: 0; background: #000; }
+  .cr-full-container { width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; }
+  
+  #cr-video { width: 100%; height: 100%; object-fit: cover; filter: grayscale(0.3) contrast(1.2); }
+  
+  .cr-hud-overlay { position: absolute; inset: 0; pointer-events: none; padding: 40px; display: flex; flex-direction: column; justify-content: space-between; }
+  
+  .cr-top-bar { display: flex; justify-content: space-between; align-items: flex-start; }
+  .cr-rec { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,0.5); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(255,69,58,0.3); backdrop-filter: blur(10px); }
+  .cr-rec-dot { width: 12px; height: 12px; background: var(--system-red); border-radius: 50%; animation: recBlink 1s infinite alternate; }
+  .cr-rec-text { font-family: var(--font-mono); font-size: 13px; font-weight: 500; color: var(--system-red); letter-spacing: 1px; }
+  @keyframes recBlink { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+
+  .cr-system-data { text-align: right; font-family: var(--font-mono); font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.6; text-shadow: 0 1px 4px #000; }
+
+  .cr-bottom-bar { display: flex; justify-content: space-between; align-items: flex-end; }
+  .cr-stats-group { display: flex; gap: 48px; background: rgba(0,0,0,0.5); padding: 24px 32px; border-radius: 12px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+  .cr-stat { display: flex; flex-direction: column; gap: 4px; }
+  .cr-stat-lbl { font-size: 11px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; }
+  .cr-stat-val { font-size: 32px; font-family: var(--font-mono); color: var(--text-primary); }
+
+  .abort-btn {
+    pointer-events: auto; background: var(--system-red); color: white; border: none;
+    padding: 20px 40px; border-radius: 8px; font-size: 16px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    cursor: pointer; box-shadow: 0 8px 32px rgba(255, 69, 58, 0.4); transition: 0.2s;
+  }
+  .abort-btn:hover { background: #FF5147; transform: scale(0.98); }
+
+</style>
+</head>
+<body>
+
+<div class="app-window">
+  
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="window-controls">
+      <div class="win-btn close"></div>
+      <div class="win-btn min"></div>
+      <div class="win-btn max"></div>
+    </div>
+
+    <div class="nav-group-title">Operations</div>
+    <div class="nav-item active" onclick="nav('map', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"></polygon><line x1="9" y1="3" x2="9" y2="18"></line><line x1="15" y1="6" x2="15" y2="21"></line></svg>
+      Map Array
+    </div>
+    <div class="nav-item" onclick="nav('analyze', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+      Analyze
+    </div>
+
+    <div class="nav-group-title">Management</div>
+    <div class="nav-item" onclick="nav('finance', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+      Finance
+    </div>
+    <div class="nav-item" onclick="nav('resources', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+      Resources
+    </div>
+
+    <div class="nav-group-title">Critical</div>
+    <div class="nav-item red-item" onclick="nav('codered', this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      Code Red
+    </div>
+
+    <div class="user-profile">
+      <div class="avatar">MS</div>
+      <div class="user-details">
+        <span class="user-name">M. Svklepan</span>
+        <span class="user-role">System Administrator</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    
+    <!-- 1. MAP VIEW -->
+    <section id="v-map" class="view active">
+      <div class="map-wrapper">
+        <canvas id="map-canvas"></canvas>
+        <div class="map-toolbar">
+          <div class="toolbar-title">Layers</div>
+          <div class="layer-item">
+            <div class="layer-label"><div class="layer-dot" style="background: var(--system-gray);"></div> Topography</div>
+            <label class="switch"><input type="checkbox" checked onchange="drawMap()"><span class="slider"></span></label>
+          </div>
+          <div class="layer-item">
+            <div class="layer-label"><div class="layer-dot" style="background: var(--system-blue);"></div> Sensor Mesh</div>
+            <label class="switch"><input type="checkbox" checked onchange="drawMap()"><span class="slider"></span></label>
+          </div>
+          <div class="layer-item">
+            <div class="layer-label"><div class="layer-dot" style="background: var(--system-green);"></div> Yield Zones</div>
+            <label class="switch"><input type="checkbox" checked onchange="drawMap()"><span class="slider"></span></label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. FINANCE VIEW -->
+    <section id="v-finance" class="view">
+      <div class="page-header">
+        <h1 class="page-title">Finance</h1>
+        <p class="page-subtitle">Capital overview and platform return on investment</p>
+      </div>
+
+      <div class="content-grid">
+        <div class="panel fin-metrics">
+          <div class="metric-card">
+            <span class="panel-title">Revenue YTD</span>
+            <span class="metric-val">$1.24M</span>
+            <span class="metric-sub text-green">↑ 14.2% vs Last Year</span>
+          </div>
+          <div class="metric-card">
+            <span class="panel-title">Opex Savings</span>
+            <span class="metric-val">$84.2K</span>
+            <span class="metric-sub text-green">↑ 22.4% Optimization</span>
+          </div>
+          <div class="metric-card">
+            <span class="panel-title">Platform ROI</span>
+            <span class="metric-val">342%</span>
+            <span class="metric-sub" style="color:var(--text-secondary)">Target: 300%</span>
+          </div>
+          <div class="metric-card">
+            <span class="panel-title">Burn Rate / Mo</span>
+            <span class="metric-val">$12.4K</span>
+            <span class="metric-sub text-red">↓ 2.1% MoM</span>
+          </div>
+        </div>
+
+        <div class="panel fin-chart">
+          <span class="panel-title">Cash Flow</span>
+          <div class="smooth-line-chart">
+            <svg viewBox="0 0 800 250" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="blue-grad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="rgba(10, 132, 255, 0.3)" />
+                  <stop offset="100%" stop-color="rgba(10, 132, 255, 0)" />
+                </linearGradient>
+              </defs>
+              <line class="chart-grid-line" x1="0" y1="50" x2="800" y2="50" />
+              <line class="chart-grid-line" x1="0" y1="125" x2="800" y2="125" />
+              <line class="chart-grid-line" x1="0" y1="200" x2="800" y2="200" />
+              
+              <path class="chart-gradient" d="M0,200 L0,170 C100,150 200,180 300,130 C400,80 500,110 600,70 C700,30 750,40 800,10 L800,200 Z" />
+              <path class="chart-path" d="M0,170 C100,150 200,180 300,130 C400,80 500,110 600,70 C700,30 750,40 800,10" />
+              
+              <text fill="var(--text-secondary)" font-size="12" x="0" y="230">APR</text>
+              <text fill="var(--text-secondary)" font-size="12" x="150" y="230">MAY</text>
+              <text fill="var(--text-secondary)" font-size="12" x="310" y="230">JUN</text>
+              <text fill="var(--text-secondary)" font-size="12" x="470" y="230">JUL</text>
+              <text fill="var(--text-secondary)" font-size="12" x="630" y="230">AUG</text>
+              <text fill="var(--text-secondary)" font-size="12" x="770" y="230">SEP</text>
+            </svg>
+          </div>
+        </div>
+
+        <div class="panel fin-table">
+          <span class="panel-title">Expense Allocation</span>
+          <div class="table-wrap">
+            <table class="data-list">
+              <tr>
+                <td class="dl-name">Fleet Maintenance</td>
+                <td class="dl-val">$14,200</td>
+                <td class="dl-delta text-green">- $800</td>
+              </tr>
+              <tr>
+                <td class="dl-name">Chem Inputs (Precision)</td>
+                <td class="dl-val">$8,450</td>
+                <td class="dl-delta text-green">- $15,550</td>
+              </tr>
+              <tr>
+                <td class="dl-name">Irrigation Ops</td>
+                <td class="dl-val">$12,100</td>
+                <td class="dl-delta text-green">- $5,900</td>
+              </tr>
+              <tr>
+                <td class="dl-name">Cloud Compute / ML</td>
+                <td class="dl-val">$4,800</td>
+                <td class="dl-delta text-red">+ $800</td>
+              </tr>
+              <tr>
+                <td class="dl-name">Hardware Depreciation</td>
+                <td class="dl-val">$6,200</td>
+                <td class="dl-delta" style="color:var(--text-secondary)">$0</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. RESOURCES VIEW -->
+    <section id="v-resources" class="view">
+      <div class="page-header">
+        <h1 class="page-title">Resources</h1>
+        <p class="page-subtitle">Telemetry index and sustainability consumption</p>
+      </div>
+
+      <div class="content-grid">
+        <div class="res-cards">
+          <div class="panel res-card">
+            <div class="res-header">
+              <span class="panel-title">Water Quota</span>
+              <div class="res-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg></div>
+            </div>
+            <div class="res-big-num">58<span style="font-size:18px; color:var(--text-secondary)">%</span></div>
+            <div class="thin-bar-bg"><div class="thin-bar-fg" style="width: 58%; background: var(--system-blue);"></div></div>
+            <div class="res-labels"><span>12.4 ML Used</span><span>21.0 ML Cap</span></div>
+          </div>
+          
+          <div class="panel res-card">
+            <div class="res-header">
+              <span class="panel-title">Chem Inputs</span>
+              <div class="res-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7 2 17 2 22 22 2 22 7 2"></polygon></svg></div>
+            </div>
+            <div class="res-big-num">22<span style="font-size:18px; color:var(--text-secondary)">%</span></div>
+            <div class="thin-bar-bg"><div class="thin-bar-fg" style="width: 22%; background: var(--system-green);"></div></div>
+            <div class="res-labels"><span>420 KG Used</span><span>1900 KG Cap</span></div>
+          </div>
+
+          <div class="panel res-card">
+            <div class="res-header">
+              <span class="panel-title">Grid Energy</span>
+              <div class="res-icon-wrap"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path></svg></div>
+            </div>
+            <div class="res-big-num">88<span style="font-size:18px; color:var(--text-secondary)">%</span></div>
+            <div class="thin-bar-bg"><div class="thin-bar-fg" style="width: 88%; background: var(--system-orange);"></div></div>
+            <div class="res-labels"><span>14.2 MWh Used</span><span class="text-red">Warning Limit</span></div>
+          </div>
+        </div>
+
+        <div class="panel res-log">
+          <div class="panel-header"><span class="panel-title">Consumption Log</span></div>
+          <table class="log-table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Subsystem</th>
+                <th>Resource</th>
+                <th>Volume</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="color:var(--text-secondary)">08:00 AM</td>
+                <td>Irrigation Alpha</td>
+                <td>Water</td>
+                <td>45,000 L</td>
+                <td class="text-green">Optimal</td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">10:30 AM</td>
+                <td>Drone Swarm Beta</td>
+                <td>Energy</td>
+                <td>120 kWh</td>
+                <td style="color:var(--system-orange)">Elevated</td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">12:15 PM</td>
+                <td>Laser Weeder Gamma</td>
+                <td>Energy</td>
+                <td>85 kWh</td>
+                <td class="text-green">Optimal</td>
+              </tr>
+              <tr>
+                <td style="color:var(--text-secondary)">14:00 PM</td>
+                <td>Fertigation Unit 2</td>
+                <td>Chemicals</td>
+                <td>12 KG</td>
+                <td class="text-green">Optimal</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. ANALYZE VIEW -->
+    <section id="v-analyze" class="view">
+      <div class="page-header">
+        <h1 class="page-title">Analyze</h1>
+        <p class="page-subtitle">Machine learning models and inference engine status</p>
+      </div>
+
+      <div class="content-grid">
+        <div class="analyze-sidebar">
+          <div class="model-item">
+            <div class="model-item-top">
+              <span class="model-name">YOLOv8-AGRO</span>
+              <div class="model-status"><div class="status-dot dot-green"></div> Online</div>
+            </div>
+            <div class="user-role">Pest & Disease Visual Inference. Latency: 12ms.</div>
+          </div>
+          <div class="model-item">
+            <div class="model-item-top">
+              <span class="model-name">GNN-HYBRID-V3</span>
+              <div class="model-status"><div class="status-dot dot-green"></div> Online</div>
+            </div>
+            <div class="user-role">Yield Prediction & Drought Simulation.</div>
+          </div>
+          <div class="model-item">
+            <div class="model-item-top">
+              <span class="model-name">SENTINEL-SYNC</span>
+              <div class="model-status"><div class="status-dot dot-blue"></div> Syncing (42%)</div>
+            </div>
+            <div class="user-role">Multispectral Satellite Data Download.</div>
+          </div>
+          <div class="model-item">
+            <div class="model-item-top">
+              <span class="model-name">AUTO-ROUTING-RL</span>
+              <div class="model-status"><div class="status-dot dot-green"></div> Online</div>
+            </div>
+            <div class="user-role">Drone Swarm Path Optimization.</div>
+          </div>
+        </div>
+
+        <div class="analyze-console">
+          <div class="console-tab">
+            <span class="console-tab-text">admin@argoau: /var/log/ml_inference.log</span>
+          </div>
+          <div class="console-output">
+            <div class="log-row"><span class="l-time">14:02:11</span><span class="l-src">[YOLO]</span><span class="l-msg">Processed 14,204 frames in 1.2s</span></div>
+            <div class="log-row"><span class="l-time">14:02:15</span><span class="l-src">[YOLO]</span><span class="l-msg">Target detected: S. exigua. Confidence: 0.94</span></div>
+            <div class="log-row"><span class="l-time">14:02:16</span><span class="l-src">[SYS]</span><span class="l-msg warn">Laser emitter temp rising. Throttling...</span></div>
+            <div class="log-row"><span class="l-time">14:02:18</span><span class="l-src">[SYS]</span><span class="l-msg">Elimination confirmed. Logging coordinates.</span></div>
+            <div class="log-row"><span class="l-time">14:02:40</span><span class="l-src">[GNN]</span><span class="l-msg">Epoch 42100 completed. Loss: 0.042</span></div>
+            <div class="log-row"><span class="l-time">14:03:01</span><span class="l-src">[SYNC]</span><span class="l-msg">Syncing digital twin parameters.</span></div>
+            <div class="log-row"><span class="l-time">14:03:15</span><span class="l-src">[SWARM]</span><span class="l-msg">Fleet reassignment protocol initialized.</span></div>
+            <div class="log-row"><span class="l-time">14:03:22</span><span class="l-src">[SYNC]</span><span class="l-msg text-green">Awaiting new Sentinel-2 imagery block...</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. CODE RED VIEW -->
+    <section id="v-codered" class="view">
+      <div class="cr-full-container">
+        
+        <div class="cr-hud-overlay">
+          <div class="cr-top-bar">
+            <div class="cr-rec">
+              <div class="cr-rec-dot"></div>
+              <span class="cr-rec-text">LIVE INTERCEPT // ALPHA-01</span>
+            </div>
+            <div class="cr-system-data">
+              <span style="color:var(--system-red); font-weight: 600;">ENGAGEMENT: LETHAL</span><br>
+              ALT: 2.4M<br>
+              SPD: 4.2 M/S
+            </div>
+          </div>
+
+          <div class="cr-bottom-bar">
+            <div class="cr-stats-group">
+              <div class="cr-stat">
+                <span class="cr-stat-lbl">Eliminations</span>
+                <span class="cr-stat-val" id="cr-kills-val">1,247</span>
+              </div>
+              <div class="cr-stat">
+                <span class="cr-stat-lbl">Accuracy</span>
+                <span class="cr-stat-val text-green">98.4%</span>
+              </div>
+            </div>
+            <button class="abort-btn">Abort Mission</button>
+          </div>
+        </div>
+
+        <canvas id="cr-video-canvas"></canvas>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+function nav(id, el) {
+  document.querySelectorAll('.view').forEach(e => e.classList.remove('active'));
+  document.getElementById('v-' + id).classList.add('active');
+  
+  document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+
+  if(id === 'map') setTimeout(drawMap, 50);
+  if(id === 'codered') startCodeRed();
+}
+
+// ── MAP ENGINE (Strict Parallelograms) ──
+const mCanvas = document.getElementById('map-canvas');
+const mCtx = mCanvas.getContext('2d');
+
+function drawMap() {
+  if(!mCanvas || !document.getElementById('v-map').classList.contains('active')) return;
+  const rect = mCanvas.parentElement.getBoundingClientRect();
+  const W = mCanvas.width = rect.width;
+  const H = mCanvas.height = rect.height;
+
+  mCtx.clearRect(0,0,W,H);
+  mCtx.lineJoin = "miter";
+  mCtx.lineCap = "square";
+
+  const toggles = document.querySelectorAll('.map-toolbar input[type="checkbox"]');
+  const showMesh = toggles[1].checked;
+  const showZones = toggles[2].checked;
+
+  if (showZones) {
+    // Parallelogram 1 (Green)
+    mCtx.beginPath();
+    mCtx.moveTo(W*0.15, H*0.25);
+    mCtx.lineTo(W*0.45, H*0.25);
+    mCtx.lineTo(W*0.35, H*0.75);
+    mCtx.lineTo(W*0.05, H*0.75);
+    mCtx.closePath();
+    mCtx.fillStyle = 'rgba(50, 215, 75, 0.1)'; mCtx.fill();
+    mCtx.strokeStyle = 'rgba(50, 215, 75, 0.6)'; mCtx.lineWidth = 1; mCtx.stroke();
+
+    // Parallelogram 2 (Blue)
+    mCtx.beginPath();
+    mCtx.moveTo(W*0.5, H*0.35);
+    mCtx.lineTo(W*0.9, H*0.35);
+    mCtx.lineTo(W*0.8, H*0.85);
+    mCtx.lineTo(W*0.4, H*0.85);
+    mCtx.closePath();
+    mCtx.fillStyle = 'rgba(10, 132, 255, 0.1)'; mCtx.fill();
+    mCtx.strokeStyle = 'rgba(10, 132, 255, 0.6)'; mCtx.stroke();
+  }
+
+  if (showMesh) {
+    mCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+    mCtx.lineWidth = 1;
+    for(let i=0; i<W; i+=60) { mCtx.beginPath(); mCtx.moveTo(i,0); mCtx.lineTo(i,H); mCtx.stroke(); }
+    for(let i=0; i<H; i+=60) { mCtx.beginPath(); mCtx.moveTo(0,i); mCtx.lineTo(W,i); mCtx.stroke(); }
+  }
+}
+window.addEventListener('resize', drawMap);
+setTimeout(drawMap, 100);
+
+// ── CODE RED ENGINE ──
+const crCanvas = document.getElementById('cr-video-canvas');
+const crCtx = crCanvas.getContext('2d');
+let crAnimId;
+
+function startCodeRed() {
+  if(crAnimId) cancelAnimationFrame(crAnimId);
+  let time = 0;
+  
+  function render() {
+    if(!document.getElementById('v-codered').classList.contains('active')) return;
+    const w = crCanvas.width = crCanvas.offsetWidth;
+    const h = crCanvas.height = crCanvas.offsetHeight;
+    
+    if(w>0 && h>0) {
+      crCtx.fillStyle = '#050505';
+      crCtx.fillRect(0,0,w,h);
+
+      // Night vision / thermal lines
+      crCtx.strokeStyle = `rgba(255, 69, 58, ${0.05 + Math.sin(time)*0.02})`;
+      crCtx.lineWidth = 1;
+      for(let i=0; i<h; i+=8) {
+        crCtx.beginPath(); crCtx.moveTo(0, i); crCtx.lineTo(w, i); crCtx.stroke();
+      }
+      
+      // Target 1
+      crCtx.strokeStyle = 'rgba(255, 69, 58, 0.8)';
+      crCtx.lineWidth = 2;
+      const t1x = w * 0.45, t1y = h * 0.35, t1s = 120;
+      crCtx.strokeRect(t1x, t1y, t1s, t1s);
+      crCtx.fillStyle = 'rgba(255, 69, 58, 0.9)';
+      crCtx.font = '10px monospace';
+      crCtx.fillText('TGT: H. ARMIGERA 99%', t1x, t1y - 8);
+
+      // Target 2
+      const t2x = w * 0.25, t2y = h * 0.65, t2s = 80;
+      crCtx.strokeRect(t2x, t2y, t2s, t2s);
+      crCtx.fillText('TGT: S. EXIGUA 92%', t2x, t2y - 8);
+    }
+    time += 0.05;
+    crAnimId = requestAnimationFrame(render);
+  }
+  render();
+}
+
+let killCount = 1247;
+setInterval(() => {
+  if(document.getElementById('v-codered').classList.contains('active')) {
+    killCount++;
+    document.getElementById('cr-kills-val').innerText = killCount.toLocaleString();
+  }
+}, 3500);
+
+</script>
+</body>
+</html>
